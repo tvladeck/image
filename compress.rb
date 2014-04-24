@@ -1,13 +1,9 @@
 require 'RMagick'
 require 'zlib'
 include Magick
-
+load "partition.rb"
 
 # todo
-# 1 split rectangle into right isoceles triangles
-# - Euclidean algorithm does this
-# - http://arxiv.org/pdf/math/9411215.pdf
-# - lets use that
 # 2 number pixels in said triangle
 # - could be a better way to to this (better than naive)
 # 3 keep track of pixels while going through
@@ -19,7 +15,6 @@ include Magick
 # 6 compress delta table into minimum size
 
 # loads image
-# can change this to ARG[0] or whatever
 img = Image.read(ARGV[0]).first
 
 columns = img.base_columns
