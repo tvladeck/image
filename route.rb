@@ -32,9 +32,6 @@ module Route
       end
 
       row_positions.each do |p|
-        puts "row positions are: #{row_positions}"
-        puts "class of row is #{r.class}"
-        puts "class of row position is #{p.class}"
         pixels_completed << [r, p]
         tri_coordinates = { x: r, y: p }
         true_pos = transform_coordinates(xy, tri_coordinates, orientation)
@@ -50,7 +47,6 @@ module Route
         _terminate = false
         index = [r, p]
         until _terminate == true
-          puts "hi\n"
 
           if index[0] == px-1
             _terminate = true
@@ -73,7 +69,6 @@ module Route
             delta_table << img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
             index = pixel
           else
-            puts "pixels below are: #{pixels_below}"
             deltas = []
             pixels_below.each do |b|
               tri_coordinates = { x: b[0], y: b[1] }

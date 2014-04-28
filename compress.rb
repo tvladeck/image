@@ -3,6 +3,7 @@ require 'zlib'
 include Magick
 load "partition.rb"
 load "route.rb"
+load "huffman.rb"
 
 # todo
 # 1 make partition function work with a max of some # of pixels
@@ -16,18 +17,33 @@ load "route.rb"
 # 6 compress delta table into minimum size
 
 # loads image
-img = Image.read("test4.png").first
+img = Image.read("test3.png").first
 
 columns = img.base_columns
 rows    = img.base_rows
 
 channels = [:red, :green, :blue]
+pixels = 100
 
-# load the route table
-route_table = ""
 
-# load the delta table
-delta_table = []
+puts "testing..."
+routes = Route.generate_routes(img, {x:100, y:100}, pixels, true, :red)
+delta_string = routes[:delta_table].pack("S*")
+encoding = Huffman.huffman_encoding(delta_string)
+encoded_delta_string = Huffman.encode(delta_string, encoding)
 
-# this is just for shits and giggles
-size_table  = []
+puts "with pre-huffman..."
+prebytes = routes[:route_table].to_i(2).size + Zlib::Deflate.deflate(encoded_delta_string).bytesize
+puts "byesize is #{prebytes/1000} kB"
+
+puts "without pre-huffman"
+bytes = routes[:route_table].to_i(2).size + Zlib::Deflate.deflate(delta_string).bytesize
+puts "bytesize is #{bytes/1000} kB"
+
+pixels_covered  = pixels*pixels/2
+pixels_to_cover = columns*rows
+multiple = pixels_to_cover/pixels_covered
+
+implied_size = bytes * multiple * 3 / 1000 / 1000
+puts "implied_size is #{implied_size} MB"
+
