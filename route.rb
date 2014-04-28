@@ -35,104 +35,61 @@ module Route
 
       row_positions.each do |p|
         pixels_completed << p
-        true_pos = transorm_coordinates(xy, p, orientation)
+        tri_coordinates = { x: p[0], y: p[1] }
+        true_pos = transform_coordinates(xy, tri_coordinates, orientation)
         pixel_value = img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
         delta_table << pixel_value
 
         # if the current row is equal to the total number of rows, we don't 
         # record any delta information or more route stuff
         if r == px
-          break
+          next
         end
 
-        # figure out the possible pixels below
+        _terminate = false
+        index = [p[0],p[1]]
+        until _terminate == true
 
+          if index[0] == px
+            _terminate = true
+            break
+          end
+
+          # figure out the possible pixels below
+          pixels_below = [[index[0]+1, index[1]], index[[0]+1, index[1]+1]]
+          pixels_below.reject! { |a| pixels_completed.include? a }
+          # if no possible entries below, then we quit
+          if pixels_below.empty?
+            _terminate = true
+            break
+          elsif pixels_below.length == 1
+            pixel = pixels_below[0]
+            pixels_completed << pixel
+            route_table << (pixel[1] - index[1]).to_str
+            tri_coordinates = { x: pixel[0], y: pixel[1] }
+            true_pos = transform_coordinates(xy, tri_coordinates, orientation)
+            delta_table << img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
+            index = pixel
+          else
+            pixels_below.each do |b|
+              tri_coordinates = { x: b[0], y: b[1] }
+              true_pos = transform_coordinates(xy, tri_coordinates, orientation)
+              deltas << img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
+            end
+            delta = deltas.min
+            pixel = pixels_below[deltas.find_index(delta)]
+            pixels_completed << pixel
+            route_table << (pixel[1] - index[1]).to_str
+            tri_coordinates = { x: pixel[0], y: pixel[1] }
+            true_pos = transform_coordinates(xy, tri_coordinates, orientation)
+            delta_table << img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
+            index = pixel
+          end
+        end
       end
     end
 
-#      if i != 0
-#        possible_row_positions = (0..i).to_a
-#        pixels_in_row = pixels_completed.select { |p| p[0] == i }
-#        pixels_in_row.collect! { |p| p[1] }
-#        row_positions = possible_row_positions - pixels_in_row
-#        row_position  = row_positions[0]
-#      end
-
-#    # this stores the pixels that have information recorded
-#    pixels_completed = []
-#
-#    # for each row in the triangle
-#    # remember row is defined by the height of the triangle
-#    (0..(px-1)).each do |i|
-#
-#      # this calculates the positions within the current row need a path encoded
-#      # a given row may have >1 positions that need a path due to paths colliding
-#      # need to start a loop with row_positions that starts a route for each entry
-#      if i != 0
-#        possible_row_positions = (0..i).to_a
-#        pixels_in_row = pixels_completed.select { |p| p[0] == i }
-#        pixels_in_row.collect! { |p| p[1] }
-#        row_positions = possible_row_positions - pixels_in_row
-#        row_position  = row_positions[0]
-#      end
-#
-#      # this is the start of the route calculation
-#      # right now splitting the code by orientation, may be better in the future to combine
-#      if orientation == true
-#        if i == 0
-#          index = { x: x, y: y }
-#        else
-#          index = { x: x + i - row_position, y: x + row_position }
-#        end
-#
-#        # right now this assumes that each path makes it to the end
-#        # need to change this to a while / until loop 
-#        (i..(px-1)).each do |j|
-#          pixels_completed << [i, index[:y]]
-#          value = img.pixel_color(index[:x],   index[:y]).send(channel)
-#          right = img.pixel_color(index[:x]+1, index[:y]).send(channel)
-#          up    = img.pixel_color(index[:x],   index[:y]+1).send(channel)
-#
-#          if (value-up) < (value-right)
-#            delta_table << value-up
-#            route_table << "1"
-#            index[:y] += 1
-#          else
-#            delta_table << value-right
-#            route_table << "0"
-#            index[:x] += 1
-#          end
-#        end
-#      else # orientation == false
-#        if i == 0
-#          index = { x: x, y: y }
-#        else
-#          index = { x: x - i + row_position, y: y + row_position }
-#        end
-#
-#        value = img.pixel_color(index[:x], index[:y]).send(channel)
-#        delta_table << value
-#
-#        (i..(px-1)).each do |j|
-#          pixels_completed << [i, index[:y]]
-#          value = img.pixel_color(index[:x],   index[:y]).send(channel)
-#          left  = img.pixel_color(index[:x]-1, index[:y]).send(channel)
-#          up    = img.pixel_color(index[:x],   index[:y]+1).send(channel)
-#
-#          if (value-up) < (value-left)
-#            delta_table << value-up
-#            route_table << "1"
-#            index[:y] += 1
-#          else
-#            delta_table << value-left
-#            route_table << "0"
-#            index[:x] -= 1
-#          end
-#        end
-#      end
-#    end
-#
-#    { route_table: route_table, delta_table: delta_table }
+    { route_table: route_table, delta_table: delta_table }
   end
 
   def transform_coordinates(starting, coordinates, orientation)
