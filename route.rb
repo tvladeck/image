@@ -34,8 +34,8 @@ module Route
       end
 
       row_positions.each do |p|
-        pixels_completed << p
-        tri_coordinates = { x: p[0], y: p[1] }
+        pixels_completed << [r, p]
+        tri_coordinates = { x: r, y: p }
         true_pos = transform_coordinates(xy, tri_coordinates, orientation)
         pixel_value = img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
         delta_table << pixel_value
@@ -47,7 +47,7 @@ module Route
         end
 
         _terminate = false
-        index = [p[0],p[1]]
+        index = [r, p]
         until _terminate == true
 
           if index[0] == px
@@ -56,7 +56,7 @@ module Route
           end
 
           # figure out the possible pixels below
-          pixels_below = [[index[0]+1, index[1]], index[[0]+1, index[1]+1]]
+          pixels_below = [[index[0]+1, index[1]], [index[0]+1, index[1]+1]]
           pixels_below.reject! { |a| pixels_completed.include? a }
           # if no possible entries below, then we quit
           if pixels_below.empty?
