@@ -10,6 +10,10 @@ module Route
     # orientation = boolean. true = bottom left to up/right
     #   false = up right to down left
     # channel = :red, :green, or :blue (for now)
+    #
+    # to do: need to add boundary conditions
+    # - there may be cases where a route is bounded on both sides
+    # - need to track that because you may have to start > 1 route in a given row
 
     route_table = ""
     delta_table = []
@@ -34,9 +38,6 @@ module Route
         else
           index = { x: x + i - row_position, y: x + row_position }
         end
-
-        value = img.pixel_color(index[:x], index[:y]).send(channel)
-        delta_table << value
 
         (i..(px-1)).each do |j|
           pixels_completed << [i, index[:y]]

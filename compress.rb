@@ -5,7 +5,7 @@ load "partition.rb"
 load "route.rb"
 
 # todo
-# 1 figure out error with delta table
+# 1 make partition function work with a max of some # of pixels
 # 2 verify that route table is covering everything
 # - perhaps dump pixels_covered
 # 3 put together partition and route functions
