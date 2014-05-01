@@ -4,6 +4,7 @@ include Magick
 load "partition.rb"
 load "route.rb"
 load "huffman.rb"
+load "dct.rb"
 
 # todo
 # 1 make partition function work with a max of some # of pixels
