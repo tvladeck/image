@@ -64,9 +64,13 @@ module Route
             pixel = pixels_below[0]
             pixels_completed << pixel
             route_table << (pixel[1] - index[1]).to_s
-            tri_coordinates = { x: pixel[0], y: pixel[1] }
-            true_pos = transform_coordinates(xy, tri_coordinates, orientation)
-            delta_table << img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
+            px_tri_coordinates = { x: pixel[0], y: pixel[1] }
+            px_true_pos = transform_coordinates(xy, px_tri_coordinates, orientation)
+            px_color = img.pixel_color(true_pos[:x], px_true_pos[:y]).send(channel)
+            idx_tri_coordinates = { x: index[0], y: index[1] }
+            idx_true_pos = transform_coordinates(xy, idx_tri_coordinates, orientation)
+            idx_color = img.pixel_color(true_pos[:x], idx_true_pos[:y]).send(channel)
+            delta_table << px_color - idx_color
             index = pixel
           else
             deltas = []
@@ -79,9 +83,13 @@ module Route
             pixel = pixels_below[deltas.find_index(delta)]
             pixels_completed << pixel
             route_table << (pixel[1] - index[1]).to_s
-            tri_coordinates = { x: pixel[0], y: pixel[1] }
-            true_pos = transform_coordinates(xy, tri_coordinates, orientation)
-            delta_table << img.pixel_color(true_pos[:x], true_pos[:y]).send(channel)
+            px_tri_coordinates = { x: pixel[0], y: pixel[1] }
+            px_true_pos = transform_coordinates(xy, px_tri_coordinates, orientation)
+            px_color = img.pixel_color(true_pos[:x], px_true_pos[:y]).send(channel)
+            idx_tri_coordinates = { x: index[0], y: index[1] }
+            idx_true_pos = transform_coordinates(xy, idx_tri_coordinates, orientation)
+            idx_color = img.pixel_color(true_pos[:x], idx_true_pos[:y]).send(channel)
+            delta_table << px_color - idx_color
             index = pixel
           end
         end

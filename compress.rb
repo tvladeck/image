@@ -17,7 +17,7 @@ load "huffman.rb"
 # 6 compress delta table into minimum size
 
 # loads image
-img = Image.read("test3.png").first
+img = Image.read("test.png").first
 
 columns = img.base_columns
 rows    = img.base_rows
@@ -37,7 +37,9 @@ prebytes = routes[:route_table].to_i(2).size + Zlib::Deflate.deflate(encoded_del
 puts "byesize is #{prebytes/1000} kB"
 
 puts "without pre-huffman"
-bytes = routes[:route_table].to_i(2).size + Zlib::Deflate.deflate(delta_string).bytesize
+routebytes = routes[:route_table].to_i(2).size
+deltabytes = Zlib::Deflate.deflate(delta_string).bytesize
+bytes = deltabytes + routebytes
 puts "bytesize is #{bytes/1000} kB"
 
 pixels_covered  = pixels*pixels/2
@@ -46,4 +48,6 @@ multiple = pixels_to_cover/pixels_covered
 
 implied_size = bytes * multiple * 3 / 1000 / 1000
 puts "implied_size is #{implied_size} MB"
-
+puts "route size is: #{routebytes}"
+puts "delta size is: #{deltabytes}"
+puts "ratio is: #{routebytes/deltabytes.to_f} routebytes"
